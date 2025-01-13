@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <UserSecretsId>dotnet-WebServer-8e8f2a2a-a6c8-47a1-94a0-dadc7b11a060</UserSecretsId>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.1"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\WebServer.Domain\WebServer.Domain.csproj" />
+      <ProjectReference Include="..\WebServer.Infrastructure\WebServer.Infrastructure.csproj" />
+      <ProjectReference Include="..\WebServer.Persistence\WebServer.Persistence.csproj" />
+    </ItemGroup>
+</Project>

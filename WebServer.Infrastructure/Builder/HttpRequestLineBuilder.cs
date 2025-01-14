@@ -5,15 +5,17 @@ namespace WebServer.Infrastructure.Builder;
 
 public class HttpRequestLineBuilder : IHttpRequestLineBuilder
 {
-    private HttpMethod Method { get; set; } = HttpMethod.Get;
+    private HttpMethod? Method { get; set; }
     private string Uri { get; set; } = string.Empty;
     private string Version { get; set; } = string.Empty;
 
     public HttpRequestLine Build()
     {
+        Validate(); // It will throw if it fails
+
         return new HttpRequestLine
         {
-            Method = Method,
+            Method = Method!,
             Uri = Uri,
             Version = Version
         };
@@ -35,5 +37,23 @@ public class HttpRequestLineBuilder : IHttpRequestLineBuilder
     {
         Version = version;
         return this;
+    }
+
+    private void Validate()
+    {
+        if (Method == null)
+        {
+            throw new ArgumentNullException(nameof(Method));
+        }
+
+        if (string.IsNullOrEmpty(Uri))
+        {
+            throw new ArgumentNullException(nameof(Uri));
+        }
+
+        if (string.IsNullOrEmpty(Version))
+        {
+            throw new ArgumentNullException(nameof(Version));
+        }
     }
 }

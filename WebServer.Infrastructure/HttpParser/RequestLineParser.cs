@@ -25,14 +25,14 @@ public class RequestLineParser : IHttpParser<HttpRequestLine>
 
     private static bool IsMethodValid(string method)
     {
-        return method.Equals("GET", StringComparison.InvariantCultureIgnoreCase)
-               || method.Equals("HEAD", StringComparison.InvariantCultureIgnoreCase)
-               || method.Equals("CONNECT", StringComparison.InvariantCultureIgnoreCase)
-               || method.Equals("OPTIONS", StringComparison.InvariantCultureIgnoreCase)
-               || method.Equals("POST", StringComparison.InvariantCultureIgnoreCase)
-               || method.Equals("PUT", StringComparison.InvariantCultureIgnoreCase)
-               || method.Equals("DELETE", StringComparison.InvariantCultureIgnoreCase)
-               || method.Equals("TRACE", StringComparison.InvariantCultureIgnoreCase);
+        return method.Equals("GET", StringComparison.OrdinalIgnoreCase)
+               || method.Equals("HEAD", StringComparison.OrdinalIgnoreCase)
+               || method.Equals("CONNECT", StringComparison.OrdinalIgnoreCase)
+               || method.Equals("OPTIONS", StringComparison.OrdinalIgnoreCase)
+               || method.Equals("POST", StringComparison.OrdinalIgnoreCase)
+               || method.Equals("PUT", StringComparison.OrdinalIgnoreCase)
+               || method.Equals("DELETE", StringComparison.OrdinalIgnoreCase)
+               || method.Equals("TRACE", StringComparison.OrdinalIgnoreCase);
     }
 
     private static bool IsUriValid(string uri)

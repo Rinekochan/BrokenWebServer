@@ -1,16 +1,17 @@
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using WebServer.Domain.Core.Client;
 using WebServer.Domain.Core.Request;
-using WebServer.Infrastructure;
-using WebServer.Infrastructure.Builder;
-using WebServer.Infrastructure.HttpParser;
+using WebServer.Domain.Interfaces;
 using WebServer.Persistence.Server;
+using WebServer.Tasks;
 
 namespace WebServer;
 
-public class Worker(ILogger<Worker> logger, WebServerConfiguration config) : BackgroundService
+public class Worker(
+    ILogger<Worker> logger,
+    WebServerConfiguration config,
+    IRequestReader requestReader) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -49,45 +50,25 @@ public class Worker(ILogger<Worker> logger, WebServerConfiguration config) : Bac
     {
         // Stop reading if exceeds 3 seconds
         var cancellationToken = new CancellationTokenSource(3000).Token;
+        var token = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken, cancellationToken).Token;
 
         // read request from socket
-        HttpRequest request = await ReadRequestAsync(clientSocket,
-            CancellationTokenSource.CreateLinkedTokenSource(stoppingToken, cancellationToken).Token);
+        HttpRequest request = await requestReader.ReadRequestAsync(clientSocket, token);
 
         // handle the request
         // create response
         // send response
+        await SendResponseAsync(clientSocket, token);
 
         clientSocket.Close();
     }
 
-    private async Task<HttpRequest> ReadRequestAsync(Socket clientSocket, CancellationToken cancellationToken)
+    private async Task SendResponseAsync(Socket socket, CancellationToken stoppingToken)
     {
-        NetworkStream stream = new(clientSocket);
-        StreamReader reader = new(stream, Encoding.ASCII);
+        NetworkStream stream = new(socket);
+        StreamWriter streamWriter = new(stream);
 
-        var requestLineRaw = await reader.ReadLineAsync(cancellationToken);
-        logger.LogInformation(requestLineRaw);
-        if (requestLineRaw != null)
-        {
-            try
-            {
-                HttpRequestLine requestLine = RequestLineParser.TryParse(requestLineRaw);
-            }
-            catch (MalformedRequestException ex)
-            {
-                logger.LogError(ex, ex.Message);
-            }
-
-            var headerLine = await reader.ReadLineAsync(cancellationToken);
-            while (headerLine != null)
-            {
-                logger.LogInformation(headerLine);
-                headerLine = await reader.ReadLineAsync(cancellationToken);
-            }
-
-        }
-
-        return new HttpRequestBuilder().Build();
+        await streamWriter.WriteLineAsync("200 OK");
+        await streamWriter.FlushAsync(stoppingToken);
     }
 }

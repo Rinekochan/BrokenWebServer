@@ -8,11 +8,13 @@ public class HttpRequestBuilder : IHttpRequestBuilder
 {
     private HttpRequestLine HttpRequestLine { get; set; } = new();
     private string Host { get; set; } = string.Empty;
-    private bool IsKeepAlive { get; set; } = false;
+    private bool IsKeepAlive { get; set; }
     private IDictionary<string, StringValues> Headers { get; set; } = new Dictionary<string, StringValues>();
-    
+
     public HttpRequest Build()
     {
+        Validate(); // It will throw if it fails
+
         return new HttpRequest
         {
             RequestLine = HttpRequestLine,
@@ -22,27 +24,54 @@ public class HttpRequestBuilder : IHttpRequestBuilder
         };
     }
 
-    public IHttpRequestBuilder AddMethod(HttpMethod method)
-    {
-        HttpRequestLine.Method = method;
-        return this;
-    }
-
-    public IHttpRequestBuilder AddUri(string uri)
-    {
-        HttpRequestLine.Uri = uri;
-        return this;
-    }
-
-    public IHttpRequestBuilder AddVersion(string version)
-    {
-        HttpRequestLine.Version = version;
-        return this;
-    }
-
     public IHttpRequestBuilder AddRequestLine(HttpRequestLine requestLine)
     {
         HttpRequestLine = requestLine;
         return this;
+    }
+
+
+    public IHttpRequestBuilder AddHost(string host)
+    {
+        Host = host;
+        return this;
+    }
+
+    public IHttpRequestBuilder KeepAlive(bool isKeepAlive)
+    {
+        IsKeepAlive = isKeepAlive;
+        return this;
+    }
+
+    public IHttpRequestBuilder AddHeaders(HttpHeader header)
+    {
+        if ("Host".Equals(header.Name, StringComparison.OrdinalIgnoreCase))
+        {
+            return AddHost(header.Values.First() ?? string.Empty);
+        }
+
+        if ("Connection".Equals(header.Name, StringComparison.OrdinalIgnoreCase))
+        {
+            return KeepAlive("keep-alive".Equals(header.Values.First(), StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!Headers.TryGetValue(header.Name, out var value))
+        {
+            Headers.Add(header.Name, header.Values);
+        }
+        else
+        {
+            Headers[header.Name] = StringValues.Concat(value, header.Values);
+        }
+
+        return this;
+    }
+
+    private void Validate()
+    {
+        if (string.IsNullOrWhiteSpace(Host))
+        {
+            throw new ArgumentNullException(nameof(Host));
+        }
     }
 }

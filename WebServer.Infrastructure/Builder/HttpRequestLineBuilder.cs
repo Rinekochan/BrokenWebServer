@@ -3,7 +3,7 @@ using WebServer.Domain.Core.Request;
 
 namespace WebServer.Infrastructure.Builder;
 
-public class HttpRequestLineBuilder : IHttpBuilder<HttpRequestLine>
+public class HttpRequestLineBuilder : IHttpRequestLineBuilder
 {
     private HttpMethod Method { get; set; } = HttpMethod.Get;
     private string Uri { get; set; } = string.Empty;
@@ -19,19 +19,19 @@ public class HttpRequestLineBuilder : IHttpBuilder<HttpRequestLine>
         };
     }
 
-    public HttpRequestLineBuilder AddMethod(HttpMethod method)
+    public IHttpRequestLineBuilder AddMethod(HttpMethod method)
     {
         Method = method;
         return this;
     }
 
-    public HttpRequestLineBuilder AddUri(string uri)
+    public IHttpRequestLineBuilder AddUri(string uri)
     {
         Uri = uri;
         return this;
     }
 
-    public HttpRequestLineBuilder AddVersion(string version)
+    public IHttpRequestLineBuilder AddVersion(string version)
     {
         Version = version;
         return this;

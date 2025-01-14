@@ -1,6 +1,11 @@
-﻿namespace WebServer.Domain.Abstractions.Builders;
+﻿using WebServer.Domain.Core.Request;
 
-public interface IHttpBuilder<out T>
+namespace WebServer.Domain.Abstractions.Builders;
+
+public interface IHttpRequestBuilder : IHttpBuilder<HttpRequest>
 {
-    T Build();
+    IHttpRequestBuilder AddMethod(HttpMethod method);
+    IHttpRequestBuilder AddUri(string uri);
+    IHttpRequestBuilder AddVersion(string version);
+    IHttpRequestBuilder AddRequestLine(HttpRequestLine requestLine);
 }

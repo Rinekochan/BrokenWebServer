@@ -1,39 +1,46 @@
-﻿using WebServer.Domain.Abstractions.Builders;
+﻿using Microsoft.Extensions.Primitives;
+using WebServer.Domain.Abstractions.Builders;
 using WebServer.Domain.Core.Request;
 
 namespace WebServer.Infrastructure.Builder;
 
-public class HttpRequestBuilder : IHttpBuilder<HttpRequest>
+public class HttpRequestBuilder : IHttpRequestBuilder
 {
     private HttpRequestLine HttpRequestLine { get; set; } = new();
-
+    private string Host { get; set; } = string.Empty;
+    private bool IsKeepAlive { get; set; } = false;
+    private IDictionary<string, StringValues> Headers { get; set; } = new Dictionary<string, StringValues>();
+    
     public HttpRequest Build()
     {
         return new HttpRequest
         {
-            RequestLine = HttpRequestLine
+            RequestLine = HttpRequestLine,
+            Host = Host,
+            IsKeepAlive = IsKeepAlive,
+            Headers = Headers
         };
     }
 
-    public HttpRequestBuilder AddMethod(HttpMethod method)
+    public IHttpRequestBuilder AddMethod(HttpMethod method)
     {
         HttpRequestLine.Method = method;
         return this;
     }
 
-    public HttpRequestBuilder AddUri(string uri)
+    public IHttpRequestBuilder AddUri(string uri)
     {
         HttpRequestLine.Uri = uri;
         return this;
     }
 
-    public HttpRequestBuilder AddVersion(string version)
+    public IHttpRequestBuilder AddVersion(string version)
     {
         HttpRequestLine.Version = version;
         return this;
     }
 
-    public HttpRequestBuilder AddRequestLine(HttpRequestLine requestLine)
+    public IHttpRequestBuilder AddRequestLine(HttpRequestLine requestLine)
     {
         HttpRequestLine = requestLine;
         return this;

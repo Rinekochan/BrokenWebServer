@@ -74,6 +74,7 @@ public class Worker(
         // handle the request
         Middleware? middleware = new MiddlewareBuilder()
             .SetNext(new NotFoundMiddleware())
+            .SetNext(new StaticContentMiddleware())
             .Build();
         
         // create response

@@ -2,7 +2,7 @@
 
 namespace WebServer.Domain.Core.Request;
 
-public class HttpRequest
+public record HttpRequest
 {
     public HttpRequestLine RequestLine { get; set; }
     public required string Host { get; set; }

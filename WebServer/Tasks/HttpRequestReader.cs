@@ -1,7 +1,7 @@
 ﻿using System.Net.Sockets;
 using System.Text;
 using WebServer.Domain.Core.Request;
-using WebServer.Domain.Interfaces;
+using WebServer.Domain.Interfaces.Server;
 using WebServer.Infrastructure;
 using WebServer.Infrastructure.Builder;
 using WebServer.Infrastructure.HttpParser;

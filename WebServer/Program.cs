@@ -1,5 +1,5 @@
 using WebServer;
-using WebServer.Domain.Interfaces;
+using WebServer.Domain.Interfaces.Server;
 using WebServer.Persistence.Server;
 using WebServer.Tasks;
 

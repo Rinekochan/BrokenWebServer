@@ -1,7 +1,7 @@
 ﻿using System.Net.Sockets;
 using WebServer.Domain.Core.Request;
 
-namespace WebServer.Domain.Interfaces;
+namespace WebServer.Domain.Interfaces.Server;
 
 public interface IRequestReader
 {

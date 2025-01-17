@@ -5,5 +5,5 @@ namespace WebServer.Domain.Interfaces.Server;
 
 public interface IRequestReader
 {
-    Task<HttpRequest> ReadRequestAsync(Socket socket, CancellationToken cancellationToken);
+    Task<HttpRequest> ReadRequestAsync(CancellationToken cancellationToken);
 }

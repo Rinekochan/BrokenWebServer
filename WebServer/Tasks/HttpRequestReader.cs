@@ -8,9 +8,9 @@ using WebServer.Infrastructure.HttpParser;
 
 namespace WebServer.Tasks;
 
-public class HttpRequestReader(ILogger<HttpRequestReader> logger) : IRequestReader
+public class HttpRequestReader(Socket socket, ILogger<HttpRequestReader> logger) : IRequestReader
 {
-    public async Task<HttpRequest> ReadRequestAsync(Socket socket, CancellationToken cancellationToken)
+    public async Task<HttpRequest> ReadRequestAsync(CancellationToken cancellationToken)
     {
         NetworkStream stream = new(socket);
         StreamReader reader = new(stream, Encoding.ASCII);

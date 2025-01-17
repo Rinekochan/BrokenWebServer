@@ -1,6 +1,6 @@
 ﻿using WebServer.Domain.Interfaces.Server;
 
-namespace WebServer.Tasks;
+namespace WebServer.Domain.Core.Server;
 
 public class NullResponseBodyWriter : IResponseBodyWriter
 {

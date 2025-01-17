@@ -10,8 +10,4 @@
       <ProjectReference Include="..\WebServer.Domain\WebServer.Domain.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Server\" />
-    </ItemGroup>
-
 </Project>

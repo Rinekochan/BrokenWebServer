@@ -3,16 +3,19 @@ using System.Net.Sockets;
 using WebServer.Domain.Core.Client;
 using WebServer.Domain.Core.Request;
 using WebServer.Domain.Core.Response;
-using WebServer.Domain.Interfaces.Server;
+using WebServer.Domain.Interfaces.Factories;
+using WebServer.Domain.Interfaces.Middlewares;
+using WebServer.Infrastructure.Builder;
+using WebServer.Infrastructure.Middlewares;
 using WebServer.Persistence.Server;
-using WebServer.Tasks;
 
 namespace WebServer;
 
 public class Worker(
     ILogger<Worker> logger,
     WebServerConfiguration config,
-    IRequestReader requestReader) : BackgroundService
+    IHttpRequestReaderFactory requestReaderFactory,
+    IHttpResponseWriterFactory responseWriterFactory) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -66,38 +69,24 @@ public class Worker(
         var token = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken, cancellationToken).Token;
 
         // read request from socket
-        HttpRequest request = await requestReader.ReadRequestAsync(clientSocket, token);
+        HttpRequest request = await requestReaderFactory.Create(clientSocket).ReadRequestAsync(token);
 
         // handle the request
-
+        Middleware? middleware = new MiddlewareBuilder()
+            .SetNext(new NotFoundMiddleware())
+            .Build();
+        
         // create response
-        HttpResponse response = new()
-        {
-            ContentLength = 350,
-            ResponseBodyWriter = DefaultHttpResponseBodyWriter.Instance
-        };
-
+        HttpResponse response;
+        
+        if (middleware != null) response = await middleware.InvokeNextAsync(request);
+        else response = new HttpResponse();
+        
         // send response
-        await SendResponseAsync(clientSocket, response, token);
+        await responseWriterFactory.Create(clientSocket, response).WriteAsync(token);
 
         clientSocket.Close();
     }
 
-    private async Task SendResponseAsync(Socket socket, HttpResponse response, CancellationToken stoppingToken)
-    {
-        NetworkStream stream = new(socket);
-        StreamWriter streamWriter = new(stream);
-
-        await streamWriter.WriteLineAsync($"{response.Version} {response.StatusCode} {response.StatusText}");
-        await streamWriter.WriteLineAsync($"Content-Length: {response.ContentLength}");
-        await streamWriter.WriteLineAsync($"Content-Type: {response.ContentType}");
-        await streamWriter.WriteLineAsync();
-        await streamWriter.FlushAsync(stoppingToken);
-        if (response.ContentLength > 0)
-        {
-            await response.ResponseBodyWriter.WriteAsync(stream, stoppingToken);
-        }
-
-        await stream.FlushAsync(stoppingToken);
-    }
+   
 }

@@ -1,5 +1,7 @@
 using WebServer;
+using WebServer.Domain.Interfaces.Factories;
 using WebServer.Domain.Interfaces.Server;
+using WebServer.Factories;
 using WebServer.Persistence.Server;
 using WebServer.Tasks;
 
@@ -17,7 +19,8 @@ builder.Services.AddSingleton
     (builder.Configuration.GetRequiredSection("Server").Get<WebServerConfiguration>()
     ?? new WebServerConfiguration());
 
-builder.Services.AddTransient<IRequestReader, HttpRequestReader>();
+builder.Services.AddTransient<IHttpRequestReaderFactory, HttpRequestReaderFactory>();
+builder.Services.AddTransient<IHttpResponseWriterFactory, HttpResponseWriterFactory>();
 
 var host = builder.Build();
 host.Run();

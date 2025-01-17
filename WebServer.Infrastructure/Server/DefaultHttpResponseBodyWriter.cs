@@ -1,6 +1,6 @@
 ﻿using WebServer.Domain.Interfaces.Server;
 
-namespace WebServer.Tasks;
+namespace WebServer.Infrastructure.Server;
 
 public class DefaultHttpResponseBodyWriter : IResponseBodyWriter
 {

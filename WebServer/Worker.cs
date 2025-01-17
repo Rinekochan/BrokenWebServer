@@ -29,17 +29,29 @@ public class Worker(
         serverSocket.Listen();
 
         List<ClientConnection> clientConnections = [];
+        List<Task> activeConnections = [];
 
         while (!stoppingToken.IsCancellationRequested)
         {
             var clientSocket = await serverSocket.AcceptAsync(stoppingToken)
                                ?? throw new OperationCanceledException();
-
-            var connection = HandleNewClientConnectionAsync(clientSocket, stoppingToken);
-            clientConnections.Add(new ClientConnection
+            
+            activeConnections.Add(
+                Task.Run(() =>
+                {
+                    var connection = HandleNewClientConnectionAsync(clientSocket, stoppingToken);
+                    clientConnections.Add(new ClientConnection
+                    {
+                        Handler = connection
+                    });
+                }, stoppingToken));
+            
+            if (activeConnections.Any(connection => connection.IsCompleted))
             {
-                Handler = connection
-            });
+                activeConnections.RemoveAll(connection => connection.IsCompleted);
+                logger.LogCritical(activeConnections.Count.ToString());
+            }
+            
         }
 
         Task.WaitAll(clientConnections.Select(c => c.Handler).ToArray(), stoppingToken);
@@ -57,14 +69,14 @@ public class Worker(
         HttpRequest request = await requestReader.ReadRequestAsync(clientSocket, token);
 
         // handle the request
-        
+
         // create response
         HttpResponse response = new()
         {
             ContentLength = 350,
             ResponseBodyWriter = DefaultHttpResponseBodyWriter.Instance
         };
-        
+
         // send response
         await SendResponseAsync(clientSocket, response, token);
 
@@ -85,6 +97,7 @@ public class Worker(
         {
             await response.ResponseBodyWriter.WriteAsync(stream, stoppingToken);
         }
+
         await stream.FlushAsync(stoppingToken);
     }
 }
